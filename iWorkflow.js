@@ -105,22 +105,21 @@ function exec_list (type) {
   if (config.debug) { console.log('In exec_list with Args: ' +type)};
 
   //build options.
+  var options = { method: 'GET',
+    headers:
+     { 'cache-control': 'no-cache',
+       'x-f5-auth-token': config.token
+     }
+  };
+
   if (type === 'tenant')  {
-    var options = { method: 'GET',
-//Querystring to filter on tenants with (Cloud Tenant) in the name, to exlude built-in accounts.
-      url: 'https://'+config.host+'/mgmt/shared/authz/roles?$filter=displayName%20eq%20\'*Cloud%20Tenant*\'',
-      headers:
-       { 'cache-control': 'no-cache',
-         'x-f5-auth-token': config.token
-       }
-    };
+    //Querystring to filter on tenants with (Cloud Tenant) in the name, to exlude built-in accounts.
+    options.url = 'https://'+config.host+'/mgmt/shared/authz/roles?$filter=displayName%20eq%20\'*Cloud%20Tenant*\'',
 
     request(options, function (error, response, body) {
-  //    if (error) throw new Error(error);
-      console.log('response.statusCode: ' +response.statusCode);
-
+      if (config.debug) { console.log('response.statusCode: ' +response.statusCode) };
       if (response.statusCode == '401') {
-         console.log('Auth Token expired. Re-initialize with \'iWorkflow.js init\'');
+        console.log('Auth Token expired. Re-initialize with \'iWorkflow.js init\'');
       }
       else if (response.statusCode == '200'){
 
@@ -129,24 +128,27 @@ function exec_list (type) {
         for (var i in bodyPar.items)  {
           console.log('tenants: ' +bodyPar.items[i].displayName);
         };
-
       }
       else if (error) throw new Error(error);
     });
   }
   else if (type === 'template') {
-    var options = {
-      method: 'GET',
-      url: 'https://'+config.host+'/mgmt/cm/cloud/tenant/templates/iapp/',
-      headers:
-       { 'cache-control': 'no-cache',
-         'x-f5-auth-token': config.token }
-    };
+    options.url = 'https://'+config.host+'/mgmt/cm/cloud/tenant/templates/iapp/',
 
     request(options, function (error, response, body) {
-      if (error) throw new Error(error);
-      console.log(body.name);
-    });
+      if (config.debug) { console.log('response.statusCode: ' +response.statusCode) };
+      if (response.statusCode == '401') {
+        console.log('Auth Token expired. Re-initialize with \'iWorkflow.js init\'');
+      }
+      else if (response.statusCode == '200'){
 
+        var bodyPar = JSON.parse(body);
+
+        for (var i in bodyPar.items)  {
+          console.log('templates: ' +bodyPar.items[i].name);
+        };
+      }
+      else if (error) throw new Error(error);
+    });
   }
 };
