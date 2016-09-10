@@ -107,26 +107,31 @@ function exec_list (type) {
   //build options.
   if (type === 'tenant')  {
     var options = { method: 'GET',
-//      url: 'https://'+config.host+'/mgmt/shared/authz/roles',
-      url: 'https://'+config.host+'/mgmt/shared/authz/roles?$select=displayName&$filter=displayName%20eq%20\'*Cloud%20Tenant*\'',
-//      ?$select=displayName&$filter=displayName%20eq%20\'*Cloud%20Tenant*\'
+//Querystring to filter on tenants with (Cloud Tenant) in the name, to exlude built-in accounts.
+      url: 'https://'+config.host+'/mgmt/shared/authz/roles?$filter=displayName%20eq%20\'*Cloud%20Tenant*\'',
       headers:
        { 'cache-control': 'no-cache',
-         'x-f5-auth-token': config.token }
+         'x-f5-auth-token': config.token
+       }
     };
 
     request(options, function (error, response, body) {
   //    if (error) throw new Error(error);
       console.log('response.statusCode: ' +response.statusCode);
+
       if (response.statusCode == '401') {
          console.log('Auth Token expired. Re-initialize with \'iWorkflow.js init\'');
-       }
-       else if (response.statusCode == '200'){
-         console.log('data: ' +JSON.parse(body));
-//         console.log('stuff: ' +parsedJSON['displayName']);
+      }
+      else if (response.statusCode == '200'){
 
-       }
-       else if (error) throw new Error(error);
+        var bodyPar = JSON.parse(body);
+
+        for (var i in bodyPar.items)  {
+          console.log('tenants: ' +bodyPar.items[i].displayName);
+        };
+
+      }
+      else if (error) throw new Error(error);
     });
   }
   else if (type === 'template') {

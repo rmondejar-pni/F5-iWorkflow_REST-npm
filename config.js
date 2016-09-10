@@ -1,6 +1,6 @@
 module.exports = {
 	host: '10.128.1.130',
-	token: 'DMQL3UAC5FPR67I6FWFHOAC6IL',
+	token: 'JQN6OUTFOOXL4A7LMTPER3KBIJ',
 	strict: false,
 	debug: true
 };
