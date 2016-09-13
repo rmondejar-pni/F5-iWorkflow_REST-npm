@@ -5,18 +5,18 @@ Node package to simplify communication with the F5 iWorkflow REST API.
 Usage: iWorkflow.js <command> [options]
 
 ##Commands:
-..* help
-..* init
-..* list
-..* deploy
-..* delete
+* help
+* init
+* list
+* deploy
+* delete
 
 ##Command help:
-..* iWorkflow.js help
-..* iWorkflow.js init help
-..* iWorkflow.js list help
-..* iWorkflow.js deploy help
-..* iWorkflow.js delete help
+* iWorkflow.js help
+* iWorkflow.js init help
+* iWorkflow.js list help
+* iWorkflow.js deploy help
+* iWorkflow.js delete help
 
 iWorkflow.js is an iWorkflow REST helper. Use it as a shortcut to perform common actions against the iWorkflow REST API.
 
