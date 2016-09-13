@@ -1,8 +1,7 @@
-//EXAMPLE: input.json
 {
     "name":"myTestDeployment",
     "tenantTemplateReference":{
-        "link":"https://localhost/mgmt/cm/cloud/tenant/templates/iapp/AppSvcs_Integration-Service_A"
+        "link":"https://localhost/mgmt/cm/cloud/tenant/templates/iapp/AppSvcs_Integration_verA"
     },
     "properties":[
         {
@@ -28,7 +27,7 @@
     "vars":[
         {
             "name":"pool__addr",
-            "value":"10.128.10.21"
+            "value":"10.128.10.20"
         }
     ]
 }

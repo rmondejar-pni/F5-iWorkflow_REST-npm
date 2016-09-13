@@ -38,12 +38,13 @@ switch (myArgs[0]) {
     break;
 
   case 'deploy':
-    if (myArgs[1] === 'help' || myArgs.length < 2)  {
-      console.log('Usage: ./iWorkflow.js deploy [input.json]\n');
+    if (myArgs[1] === 'help' || myArgs.length < 3)  {
+      console.log('Usage: ./iWorkflow.js deploy [tenant] [input.json]\n');
       console.log('\t The \'deploy\' command is used to deploy an L4 - L7 Service using an iWorflow L4 - L7 Services Template. This command requires a JSON formatted input file.');
     }
     else {
-      exec_deploy(myArgs[1]);
+
+      exec_deploy(myArgs[1],myArgs[2]);
     }
     break;
 
@@ -120,7 +121,7 @@ function exec_list (type,tenant) {
     if (response.statusCode == '401') {
       console.log('Auth Token expired. Re-initialize with \'iWorkflow.js init\'');
     }
-    else if (response.statusCode == '200'){
+    else if (response.statusCode == '200')  {
 
       var bodyPar = JSON.parse(body);
 
@@ -134,6 +135,39 @@ function exec_list (type,tenant) {
   });
 };
 
-function exec_deploy (input)  {
-  console.log('In exec_deploy with input: ' +input);
+function exec_deploy (tenant, input)  {
+  if (config.debug) { console.log('In exec_deploy with Args: ' +tenant+ ' ' +input)};
+
+  var data = fs.readFileSync(input);
+
+  var options = {
+    method: 'POST',
+    url: 'https://'+config.host+'/mgmt/cm/cloud/tenants/'+tenant+'/services/iapp',
+    headers:
+     { 'cache-control': 'no-cache',
+       'content-type': 'application/json',
+       'x-f5-auth-token': config.token },
+    body: JSON.parse(data),
+    json: true
+  };
+
+  if (config.debug) {
+    console.log('options.method: ' +options.method);
+    console.log('options.url: ' +options.url);
+    console.log('options.headers: ' +JSON.stringify(options.headers));  //this is an array.
+    console.log('options.body: ' +JSON.stringify(options.body));  //this is an array.
+    console.log('options.json: ' +options.json);
+  };
+
+  request(options, function (error, response, body) {
+    if (config.debug) { console.log('response.statusCode: ' +response.statusCode) };
+
+    if (response.statusCode == '401') {
+      console.log('401 - Unauthorized: Auth Token may have expired. Re-initialize with \'iWorkflow.js init\'');
+    }
+    else if (response.statusCode == '200')  {
+      if (config.debug) { console.log('response.body' +JSON.stringify(response.body))};
+    }
+    else if (error) throw new Error(error);
+  });
 };
