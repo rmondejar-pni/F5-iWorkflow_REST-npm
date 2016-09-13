@@ -10,18 +10,18 @@ Enjoy!
 Usage: `iWorkflow.js <command> [options]`
 
 ##Commands:
-* help
-* init
-* list
-* deploy
-* delete
+`iWorkflow.js help` - prints command list
+`iWorkflow.js init` - initialize the environment and build ./config.js
+`iWorkflow.js list` - list iWorkflow resources. Supports Tenants, Templates, deployed Services.
+`iWorkflow.js deploy` - deploy L4-L7 Services
+`iWorkflow.js delete` - delete a deployed L4-L7 Service (deletes from the BIG-IP & iWorkflow)
 
 ##Command help:
-* iWorkflow.js help
-* iWorkflow.js init help
-* iWorkflow.js list help
-* iWorkflow.js deploy help
-* iWorkflow.js delete help
+`iWorkflow.js help`
+`iWorkflow.js init help`
+`iWorkflow.js list help`
+`iWorkflow.js deploy help`
+`iWorkflow.js delete help`
 
 ### iWorkflow.js init
 Used to initialize the configuration and obtain an auth token. This command generates the 'config.js' content.
