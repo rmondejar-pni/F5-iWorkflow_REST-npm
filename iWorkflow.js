@@ -161,7 +161,6 @@ function exec_deploy (tenant, input)  {
 
   request(options, function (error, response, body) {
     if (config.debug) { console.log('response.statusCode: ' +response.statusCode) };
-
     if (response.statusCode == '401') {
       console.log('401 - Unauthorized: Auth Token may have expired. Re-initialize with \'iWorkflow.js init\'');
     }
