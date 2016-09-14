@@ -7,21 +7,22 @@ Or just use it for examples when writing your own code. I'm not precious about s
 
 Enjoy!
 
-Usage: `iWorkflow.js <command> [options]`
+Usage: `node iWorkflow.js <command> [options]`
 
 ##Commands:
-* `iWorkflow.js help` - prints command list
-* `iWorkflow.js init` - initialize the environment and build ./config.js
-* `iWorkflow.js list` - list iWorkflow resources. Supports Tenants, Templates, deployed Services.
-* `iWorkflow.js deploy` - deploy L4-L7 Services
-* `iWorkflow.js delete` - delete a deployed L4-L7 Service (deletes from the BIG-IP & iWorkflow)
+* `node iWorkflow.js help` - prints command list
+* `node iWorkflow.js init` - initialize the environment and build ./config.js
+* `node iWorkflow.js list` - list iWorkflow resources. Supports Tenants, Templates, deployed Services.
+* `node iWorkflow.js deploy` - deploy L4-L7 Services
+* `node iWorkflow.js delete` - delete a deployed L4-L7 Service (deletes from the BIG-IP & iWorkflow)
 
-##Command help:
-* `iWorkflow.js help`
-* `iWorkflow.js init help`
-* `iWorkflow.js list help`
-* `iWorkflow.js deploy help`
-* `iWorkflow.js delete help`
+##Command-specific help:
+For more detailed help on each iWorkflow.js command execute: `node iWorkflow.js <command> help`
+* `node iWorkflow.js help`
+* `node iWorkflow.js init help`
+* `node iWorkflow.js list help`
+* `node iWorkflow.js deploy help`
+* `node iWorkflow.js delete help`
 
 ### iWorkflow.js init
 Used to initialize the configuration and obtain an auth token. This command generates the 'config.js' content.

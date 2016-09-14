@@ -43,17 +43,17 @@ switch (myArgs[0]) {
       console.log('\t The \'deploy\' command is used to deploy an L4 - L7 Service using an iWorflow L4 - L7 Services Template. This command requires a JSON formatted input file.');
     }
     else {
-
       exec_deploy(myArgs[1],myArgs[2]);
     }
     break;
 
   case 'delete':
     if (myArgs[1] === 'help' || myArgs.length < 3)  {
-      console.log('Usage: ./iWorkflow.js delete [file.json]');
+      console.log('Usage: ./iWorkflow.js delete [tenant] [service]');
+      console.log('\t CAUTION: The \'delete\' command also removes the objects created on BIG-IP devices. Application using those objects will become unavailable.');
     }
     else {
-      console.log('This is delete! Not yet implemented.');
+      exec_delete(myArgs[1],myArgs[2]);
     }
     break;
 
@@ -169,4 +169,38 @@ function exec_deploy (tenant, input)  {
     }
     else if (error) throw new Error(error);
   });
+};
+
+function exec_delete (tenant, service) {
+
+  if (config.debug) { console.log('In exec_deploy with Args: ' +tenant)};
+
+  var options = {
+    method: 'DELETE',
+    url: 'https://'+config.host+'/mgmt/cm/cloud/tenants/'+tenant+'/services/iapp/'+service,
+    headers:
+     { 'cache-control': 'no-cache',
+       'content-type': 'application/json',
+       'x-f5-auth-token': config.token },
+    json: true
+  };
+
+  if (config.debug) {
+    console.log('options.method: ' +options.method);
+    console.log('options.url: ' +options.url);
+    console.log('options.headers: ' +JSON.stringify(options.headers));  //this is an array.
+    console.log('options.json: ' +options.json);
+  };
+
+  request(options, function (error, response, body) {
+    if (config.debug) { console.log('response.statusCode: ' +response.statusCode) };
+    if (response.statusCode == '401') {
+      console.log('401 - Unauthorized: Auth Token may have expired. Re-initialize with \'iWorkflow.js init\'');
+    }
+    else if (response.statusCode == '200')  {
+      if (config.debug) { console.log('response.body' +JSON.stringify(response.body))};
+    }
+    else if (error) throw new Error(error);
+  });
+
 };
