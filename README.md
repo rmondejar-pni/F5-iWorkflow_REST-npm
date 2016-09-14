@@ -74,4 +74,4 @@ Example, where where the tenant is 'myTenant1' and the service is 'myTestDeploym
 
 `node ./iWorkflow.js delete myTenant1 myTestDeployment`
 
-There is no JSON response to this action. Receiving a `HTTP 200` response code indicates a successful deletion. If you receive a `404 - Not Found`, check the service name.
+There is no JSON response to this action. Receiving a `HTTP 200` response code indicates a successful deletion. If you receive a `404 - Not Found`, check the service name is correct using `node ./iWorkflow.js list service [tenant]`.
