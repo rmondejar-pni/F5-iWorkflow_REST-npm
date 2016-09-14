@@ -1,4 +1,5 @@
 //TODO: review error handling
+//TODO: use switch to handle HTTP statusCode's. Implement across all commands.
 
 //iWorkflow.js
 const fs = require('fs');
@@ -200,7 +201,10 @@ function exec_delete (tenant, service) {
       console.log('401 - Unauthorized: Auth Token may have expired. Re-initialize with \'iWorkflow.js init\'');
     }
     else if (response.statusCode == '200')  {
-      if (config.debug) { console.log('response.body' +JSON.stringify(response.body))};
+      if (config.debug) { console.log('Deletion successful. response.message' +JSON.stringify(response.message))};
+    }
+    else if (response.statusCode == '404')  {
+      if (config.debug) { console.log('Deletion unsuccessful. 404 Not found. Check the service: \'' +service+ '\' exists using \'iWorkflow.js list service ' +service+ '\'')};
     }
     else if (error) throw new Error(error);
   });

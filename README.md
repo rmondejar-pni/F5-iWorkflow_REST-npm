@@ -50,9 +50,9 @@ The list command it executed to retrieve lists of iWorkflow objects. The objects
 
 `node ./iWorkflow.js list [tenant|template|service] [options]`
 
-The 'tenant' and 'template' object types require no further options. However, the 'service' object type requires that you specify fir which 'tenant' you would like to list the deployed L4-L7 services. For example, to list the services deployed under 'myTenant1', you would execute:
+The 'tenant' and 'template' object types require no further options. However, the 'service' object type requires that you specify for which 'tenant' you would like to list the deployed L4-L7 services. This is because the deployed L4-L7 Services are resources of the parent tenant resource container. So, for example, to list the services deployed under the 'myTenant1' tenant, you would execute:
 
-`node ./iWorkflow.js list services myTenant1`
+`node ./iWorkflow.js list service myTenant1`
 
 ### iWorkflow.js deploy
 The deploy command is used to create a deployed L4-L7 service using an L4-L7 Service Template. This command requires the inclusion of a JSON formatted input file. The input file will be used to fill out the options within the L4-L7 template. An example input.json is included in the examples directory.
@@ -74,4 +74,4 @@ Example, where where the tenant is 'myTenant1' and the service is 'myTestDeploym
 
 `node ./iWorkflow.js delete myTenant1 myTestDeployment`
 
-There is no JSON response to this action. Receiving a "HTTP 200" response code indicates a successful deletion.
+There is no JSON response to this action. Receiving a `HTTP 200` response code indicates a successful deletion. If you receive a `404 - Not Found`, check the service name.
