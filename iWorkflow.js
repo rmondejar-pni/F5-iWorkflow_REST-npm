@@ -1,5 +1,6 @@
 //TODO: review error handling
 //TODO: use switch to handle HTTP statusCode's. Implement across all commands.
+//TODO: add support for 'modify (PATCH)'
 
 //iWorkflow.js
 const fs = require('fs');
@@ -42,13 +43,23 @@ switch (myArgs[0]) {
 
   case 'deploy':
     if (myArgs[1] === 'help' || myArgs.length < 3)  {
-      console.log('Usage: ./iWorkflow.js deploy [tenant] [input.json]\n');
-      console.log('\t The \'deploy\' command is used to deploy an L4 - L7 Service using an iWorflow L4 - L7 Services Template. This command requires a JSON formatted input file.');
+      console.log('Usage: ./iWorkflow.js deploy [tenant] [deploy_input.json]\n');
+      console.log('\t The \'deploy\' command is used to deploy an L4 - L7 Service using an iWorflow L4-L7 Services Template. This command requires a JSON formatted input file.');
     }
     else {
       exec_deploy(myArgs[1],myArgs[2]);
     }
     break;
+
+    case 'modify':
+      if (myArgs[1] === 'help' || myArgs.length < 4)  {
+        console.log('Usage: ./iWorkflow.js modify [tenant] [service] [modify_input.json]\n');
+        console.log('\t The \'modify\' command is used to deploy an L4-L7 Service using an iWorkflow L4-L7 Services Template. This command requires a JSON formatted input file.');
+      }
+      else {
+        exec_modify(myArgs[1],myArgs[2],myArgs[3]);
+      }
+      break;
 
   case 'delete':
     if (myArgs[1] === 'help' || myArgs.length < 3)  {
@@ -66,6 +77,7 @@ switch (myArgs[0]) {
     console.log('\tiWorkflow.js init help - required to initialize the environment/configuration');
     console.log('\tiWorkflow.js list help');
     console.log('\tiWorkflow.js deploy help');
+    console.log('\tiWorkflow.js modify help');
     console.log('\tiWorkflow.js delete help');
 };
 
@@ -174,6 +186,46 @@ function exec_deploy (tenant, input)  {
   });
 };
 
+function exec_modify (tenant,service,input) {
+  //implement L4-L7 service PATCH. Use add-pool example
+  if (config.debug) { console.log('In exec_deploy with Args: ' +tenant+ ' ' +service+ ' ' +input)};
+
+  var data = fs.readFileSync(input);
+
+  var options = {
+    method: 'PATCH',
+    url: 'https://'+config.host+'/mgmt/cm/cloud/tenants/'+tenant+'/services/iapp/'+service,
+    headers:
+     { 'cache-control': 'no-cache',
+       'content-type': 'application/json',
+       'x-f5-auth-token': config.token },
+    body: JSON.parse(data),
+    json: true
+  };
+
+  if (config.debug) {
+    console.log('options.method: ' +options.method);
+    console.log('options.url: ' +options.url);
+    console.log('options.headers: ' +JSON.stringify(options.headers));  //this is an array.
+    console.log('options.body: ' +JSON.stringify(options.body));  //this is an array.
+    console.log('options.json: ' +options.json);
+  };
+
+  request(options, function (error, response, body) {
+    if (config.debug) { console.log('response.statusCode: ' +response.statusCode) };
+    if (response.statusCode == '401') {
+      console.log('401 - Unauthorized: Auth Token may have expired. Re-initialize with \'iWorkflow.js init\'');
+      if (config.debug) { console.log('response.body' +JSON.stringify(response.body))};
+
+    }
+    else if (response.statusCode == '200')  {
+      if (config.debug) { console.log('response.body' +JSON.stringify(response.body))};
+    }
+    else if (error) throw new Error(error);
+  });
+};
+
+
 function exec_delete (tenant, service) {
 
   if (config.debug) { console.log('In exec_deploy with Args: ' +tenant)};
@@ -208,5 +260,8 @@ function exec_delete (tenant, service) {
     }
     else if (error) throw new Error(error);
   });
+};
 
+function handle_error (err_from,err_data)  {
+  if (config.debug) { console.log('error caught in: ' +err_from+ 'with error: ' +err_data) };
 };
