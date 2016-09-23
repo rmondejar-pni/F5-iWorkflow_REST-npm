@@ -1,0 +1,40 @@
+{
+  "name": "myTestDeployment0",
+  "tables": [
+      {
+        "name": "pool__hosts",
+        "columns": ["name"],
+        "rows": [
+          ["acme.com"]
+        ]
+      },
+      {
+        "name": "pool__Members",
+        "columns": ["IPAddress","Port"],
+        "rows": [
+          ["10.128.20.1","8080"],
+          ["10.128.20.2","8080"],
+          ["10.128.20.3","8081"]
+        ]
+      }
+  ],
+  "vars": [
+      {
+        "name": "pool__addr",
+        "value": "10.1.20.20",
+        "providerType": "NODE"
+      }
+  ],
+  "tenantTemplateReference": {
+    "link": "https://localhost/mgmt/cm/cloud/tenant/templates/iapp/AppSvcs_Integration_verA"
+  },
+  "tenantReference": {
+    "link": "https://localhost/mgmt/cm/cloud/tenants/myTenant1"
+  },
+  "properties": [{
+    "id": "cloudConnectorReference",
+    "isRequired": false,
+    "value": "https://localhost/mgmt/cm/cloud/connectors/local/bea388b8-46f8-4363-9f89-d8920ea8931f"
+  }],
+  "selfLink": "https://localhost/mgmt/cm/cloud/tenants/myTenant1/services/iapp/myTestDeployment0"
+}

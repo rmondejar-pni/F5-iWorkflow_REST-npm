@@ -1,0 +1,33 @@
+{
+    "name":"myTestDeployment1",
+    "tenantTemplateReference":{
+        "link":"https://localhost/mgmt/cm/cloud/tenant/templates/iapp/f5.http_ServiceTypeA"
+    },
+    "properties":[
+        {
+            "id":"cloudConnectorReference",
+            "value":"https://localhost/mgmt/cm/cloud/connectors/local/bea388b8-46f8-4363-9f89-d8920ea8931f"
+        }
+    ],
+    "tables":[
+        {
+            "name":"pool__hosts",
+            "columns":["name"],
+            "rows":[["acme.com"]]
+        },
+        {
+            "name":"pool__members",
+            "columns":["addr", "port"],
+            "rows":[
+                ["10.128.20.1", "8080"],
+                ["10.128.20.2", "8080"]
+            ]
+        }
+    ],
+    "vars":[
+        {
+            "name":"pool__addr",
+            "value":"10.128.10.21"
+        }
+    ]
+}

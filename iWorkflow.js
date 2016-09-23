@@ -193,7 +193,7 @@ function exec_modify (tenant,service,input) {
   var data = fs.readFileSync(input);
 
   var options = {
-    method: 'PATCH',
+    method: 'PUT',
     url: 'https://'+config.host+'/mgmt/cm/cloud/tenants/'+tenant+'/services/iapp/'+service,
     headers:
      { 'cache-control': 'no-cache',
@@ -213,6 +213,7 @@ function exec_modify (tenant,service,input) {
 
   request(options, function (error, response, body) {
     if (config.debug) { console.log('response.statusCode: ' +response.statusCode) };
+    if (config.debug) { console.log('response.body: ' +JSON.stringify(response.body)) };
     if (response.statusCode == '401') {
       console.log('401 - Unauthorized: Auth Token may have expired. Re-initialize with \'iWorkflow.js init\'');
       if (config.debug) { console.log('response.body' +JSON.stringify(response.body))};

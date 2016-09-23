@@ -1,5 +1,5 @@
 {
-    "name":"myTestDeployment",
+    "name":"myTestDeployment0",
     "tenantTemplateReference":{
         "link":"https://localhost/mgmt/cm/cloud/tenant/templates/iapp/AppSvcs_Integration_verA"
     },
@@ -11,13 +11,8 @@
     ],
     "tables":[
         {
-            "name":"pool__hosts",
-            "columns":["name"],
-            "rows":[["acme.com"]]
-        },
-        {
-            "name":"pool__members",
-            "columns":["addr", "port"],
+            "name":"pool__Members",
+            "columns":["IPAddress", "Port"],
             "rows":[
                 ["10.128.20.1", "8080"],
                 ["10.128.20.2", "8080"]
