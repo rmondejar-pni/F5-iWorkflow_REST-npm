@@ -3,6 +3,9 @@ Node package to simplify communication with the F5 iWorkflow REST API.
 
 iWorkflow.js is an iWorkflow REST helper. Use it as a shortcut to perform common actions against the iWorkflow REST API.
 
+Requires: request - https://www.npmjs.com/package/request
+`npm install request`
+
 Or just use it for examples when writing your own code. I'm not precious about sharing code. :)
 
 Enjoy!
@@ -14,7 +17,7 @@ Usage: `node ./iWorkflow.js <command> [options]`
 * `node ./iWorkflow.js init` - initialize the environment and build ./config.js
 * `node ./iWorkflow.js list` - list iWorkflow resources. Supports Tenants, Templates, deployed Services.
 * `node ./iWorkflow.js deploy` - deploy L4-L7 Services
-* `node ./iWorkflow.js deploy` - modify a deployed L4-L7 Service
+* `node ./iWorkflow.js modify` - modify a deployed L4-L7 Service
 * `node ./iWorkflow.js delete` - delete a deployed L4-L7 Service (deletes from the BIG-IP & iWorkflow)
 
 ##Command-specific help:
@@ -62,9 +65,9 @@ The deploy command is used to create a deployed L4-L7 service using an L4-L7 Ser
 
 `node ./iWorkflow.js deploy [tenant] [input_file]`
 
-Example deployment to the 'myTenant1' tenant using a JSON formatted input file named 'deploy_input-AppScvs_Integraion.json':
+Example deployment to the 'myTenant1' tenant using a JSON formatted input file named 'deploy_input-AppScvs_Integration.json':
 
-`node ./iWorkflow.js deploy myTenant1 ./examples/deploy_input-AppScvs_Integraion.json`
+`node ./iWorkflow.js deploy myTenant1 ./examples/deploy_input-AppScvs_Integration.json`
 
 You will find an example input file in the './examples' directory of this repository.
 
@@ -73,9 +76,9 @@ The modify command is used to make changes to properties of a deployed L4-L7 ser
 
 `node ./iWorkflow.js modify [tenant] [input_file]`
 
-Example deployment to the 'myTenant1' tenant using the JSON formatted input file named 'modify_input-AppScvs_Integraion.json':
+Example deployment to the 'myTenant1' tenant using the JSON formatted input file named 'modify_input-AppScvs_Integration.json':
 
-`node ./iWorkflow.js modify myTenant1 ./examples/modify_input-AppScvs_Integraion.json`
+`node ./iWorkflow.js modify myTenant1 ./examples/modify_input-AppScvs_Integration.json`
 
 You will find an example input file in the './examples' directory of this repository.
 
