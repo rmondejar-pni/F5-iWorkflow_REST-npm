@@ -14,6 +14,7 @@ Usage: `node ./iWorkflow.js <command> [options]`
 * `node ./iWorkflow.js init` - initialize the environment and build ./config.js
 * `node ./iWorkflow.js list` - list iWorkflow resources. Supports Tenants, Templates, deployed Services.
 * `node ./iWorkflow.js deploy` - deploy L4-L7 Services
+* `node ./iWorkflow.js deploy` - modify a deployed L4-L7 Service
 * `node ./iWorkflow.js delete` - delete a deployed L4-L7 Service (deletes from the BIG-IP & iWorkflow)
 
 ##Command-specific help:
@@ -21,6 +22,7 @@ For more detailed help on each iWorkflow.js command execute: `node ./iWorkflow.j
 * `node ./iWorkflow.js init help`
 * `node ./iWorkflow.js list help`
 * `node ./iWorkflow.js deploy help`
+* `node ./iWorkflow.js modify help`
 * `node ./iWorkflow.js delete help`
 
 ### iWorkflow.js init
@@ -41,7 +43,7 @@ module.exports = {
 	host: '10.128.1.130',
 	token: 'AOHGNHMWHZWLO7QZWYARPTHXL7',
 	strict: false,
-	debug: true
+	debug: false
 };
 ```
 
@@ -55,18 +57,30 @@ The 'tenant' and 'template' object types require no further options. However, th
 `node ./iWorkflow.js list service myTenant1`
 
 ### iWorkflow.js deploy
-The deploy command is used to create a deployed L4-L7 service using an L4-L7 Service Template. This command requires the inclusion of a JSON formatted input file. The input file will be used to fill out the options within the L4-L7 template. An example input.json is included in the examples directory.
+The deploy command is used to create a deployed L4-L7 service using an L4-L7 Service Template. This command requires the inclusion of a JSON formatted input file. The input file will be used to fill out the options within the L4-L7 template. Examples input files are included in the ./examples directory for both the f5.http iApp and the AppSvcs_Integration iApp.
 
 `node ./iWorkflow.js deploy [tenant] [input_file]`
 
-Example deployment to the 'myTenant1' tenant using a JSON formatted input file named 'input.json':
+Example deployment to the 'myTenant1' tenant using a JSON formatted input file named 'deploy_input-AppScvs_Integraion.json':
 
-`node ./iWorkflow.js deploy myTenant1 ./input.json`
+`node ./iWorkflow.js deploy myTenant1 ./examples/deploy_input-AppScvs_Integraion.json`
 
 You will find an example input file in the './examples' directory of this repository.
 
+### iWorkflow.js modify
+The modify command is used to make changes to properties of a deployed L4-L7 service. This command requires the inclusion of a JSON formatted input file. The input file will be used provide the new values of the service. An example modify_input.json is included in the examples directory.
+
+`node ./iWorkflow.js modify [tenant] [input_file]`
+
+Example deployment to the 'myTenant1' tenant using the JSON formatted input file named 'modify_input-AppScvs_Integraion.json':
+
+`node ./iWorkflow.js modify myTenant1 ./examples/modify_input-AppScvs_Integraion.json`
+
+You will find an example input file in the './examples' directory of this repository.
+
+
 ### iWorkflow.js delete
-The delete command is used to remove a deployed L4-L7 Service. *CAUTION:* this command will delete the L4-L7 Service from iWorkflow AND from BIG-IP. Any application being processed by this service will no longer work.
+The delete command is used to remove a deployed L4-L7 Service. *CAUTION:* this command will delete the L4-L7 Service from iWorkflow AND from BIG-IP. Any application being processed by this service will cease to process requests.
 
 `node ./iWorkflow.js delete [tenant] [service]`
 
