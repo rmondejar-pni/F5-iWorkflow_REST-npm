@@ -1,6 +1,6 @@
 //TODO: review error handling
-//TODO: use switch to handle HTTP statusCode's. Implement across all commands.
-//TODO: add support for 'modify (PATCH)'
+//TODO: create 'handle_error' function. Use switch to handle HTTP statusCode's. Implement across all commands.
+
 
 //iWorkflow.js
 const fs = require('fs');
@@ -105,7 +105,7 @@ function exec_init (host, username, password) {
     var token = body.token.token;
     if (config.debug) { console.log('token:' +token)};
     //write to config.js
-    var conf_data = 'module.exports = {\n\thost: \''+host+'\',\n\ttoken: \''+token+'\',\n\ttenants: '+config.tenants+',\n\tstrict: '+config.strict+',\n\tdebug: '+config.debug+'\n};';
+    var conf_data = 'module.exports = {\n\thost: \''+host+'\',\n\ttoken: \''+token+'\',\n\tstrict: '+config.strict+',\n\tdebug: '+config.debug+'\n};';
     if (config.debug) { console.log(conf_data)};
 
     fs.writeFile('config.js', conf_data, (err) => {

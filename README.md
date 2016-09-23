@@ -25,6 +25,7 @@ For more detailed help on each iWorkflow.js command execute: `node ./iWorkflow.j
 * `node ./iWorkflow.js modify help`
 * `node ./iWorkflow.js delete help`
 
+##Examples
 ### iWorkflow.js init
 Used to initialize the configuration and obtain an auth token. This command generates the 'config.js' content.
 
@@ -89,3 +90,14 @@ Example, where where the tenant is 'myTenant1' and the service is 'myTestDeploym
 `node ./iWorkflow.js delete myTenant1 myTestDeployment`
 
 There is no JSON response to this action. Receiving a `HTTP 200` response code indicates a successful deletion. If you receive a `404 - Not Found`, check the service name is correct using `node ./iWorkflow.js list service [tenant]`.
+
+##Troubleshooting
+iWorkflow.js supports 'debug mode'. To enable debug mode edit the config.js file and change:
+
+`debug: false`
+
+to:
+
+`debug: true`
+
+Further troubleshooting information can be found on the iWorkflow platform in /var/log/restjavad.0.log
