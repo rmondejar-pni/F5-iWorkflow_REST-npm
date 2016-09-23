@@ -1,7 +1,6 @@
 module.exports = {
 	host: '10.128.1.130',
-	token: 'LBMHC72AQJ2JCUWCVS2ACJFHNR',
-	tenants: undefined,
+	token: 'MPKHB2LJIC2WHMRVSPMLCOK5J6',
 	strict: false,
-	debug: true
+	debug: false
 };
