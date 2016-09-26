@@ -15,7 +15,7 @@ var myArgs = process.argv.slice(2);
 
 if (config.debug) {
   for (var i = 0; i < myArgs.length; i++)  {
-    console.log('myArgs'+i+ ': ' +myArgs[i]);
+    console.log('DEBUG: myArgs'+i+ ': ' +myArgs[i]);
   };
 };
 
@@ -82,7 +82,7 @@ switch (myArgs[0]) {
 };
 
 function exec_init (host, username, password) {
-  if (config.debug) { console.log('In exec_list with Args: ' +host+ ' ' +username+ ' ' +password)};
+  if (config.debug) { console.log('DEBUG: In exec_init with Args: ' +host+ ' ' +username+ ' ' +password)};
 
   //build options.
   var options = {
@@ -99,24 +99,31 @@ function exec_init (host, username, password) {
   };
 
   request(options, function (error, response, body) {
-    if (error && response.statusCode == 401) {
-       console.log('Invalid credentials\nError:' +error);
-     };
-    var token = body.token.token;
-    if (config.debug) { console.log('token:' +token)};
-    //write to config.js
-    var conf_data = 'module.exports = {\n\thost: \''+host+'\',\n\ttoken: \''+token+'\',\n\tstrict: '+config.strict+',\n\tdebug: '+config.debug+'\n};';
-    if (config.debug) { console.log(conf_data)};
+    if (error)  {
+      handle_error('init','node_err',error);
+      process.exit();
+    }
+    else if (response.statusCode !== 200) {
+      handle_error('init','http_error',response);
+      process.exit();
+    };
 
+    var token = body.token.token;
+    if (config.debug) { console.log('DEBUG: You got a shiny new token:' +token)};
+    //build the config
+    var conf_data = 'module.exports = {\n\thost: \''+host+'\',\n\ttoken: \''+token+'\',\n\tstrict: '+config.strict+',\n\tdebug: '+config.debug+'\n};';
+    if (config.debug) { console.log('DEBUG: Config data: ' +conf_data)  };
+
+    //write the config to config.js
     fs.writeFile('config.js', conf_data, (err) => {
       if (err) throw err;
-      console.log('It\'s saved!');
+      console.log('Config data written to ./config.js!');
     });
   });
 };
 
 function exec_list (type,tenant) {
-  if (config.debug) { console.log('In exec_list with Args: ' +type)};
+  if (config.debug) { console.log('DEBUG: In exec_list with Args: ' +type)};
 
   //build options.
   var options = { method: 'GET',
@@ -126,32 +133,35 @@ function exec_list (type,tenant) {
      }
   };
 
-  //Querystring to filter on tenants with (Cloud Tenant) in the name, to exlude built-in accounts.
+  //Handle the different types of 'list [options]'
+  //Querystring to filter on tenants with (Cloud Tenant) in the name, to exlude built-in tenant accounts.
   if (type === 'tenant') { options.url = 'https://'+config.host+'/mgmt/shared/authz/roles?$filter=displayName%20eq%20\'*Cloud%20Tenant*\'' };
   if (type === 'template') { options.url = 'https://'+config.host+'/mgmt/cm/cloud/tenant/templates/iapp/' };
   if (type === 'service') { options.url = 'https://'+config.host+'/mgmt/cm/cloud/tenants/'+tenant+'/services/iapp/' };
 
   request(options, function (error, response, body) {
-    if (config.debug) { console.log('response.statusCode: ' +response.statusCode) };
-    if (response.statusCode == '401') {
-      console.log('Auth Token expired. Re-initialize with \'iWorkflow.js init\'');
+    if (error)  {
+      handle_error('list','node_err',error);
+      process.exit();
     }
-    else if (response.statusCode == '200')  {
+    else if (response.statusCode !== 200) {
+      handle_error('list','http_error',response);
+      process.exit();
+    };
 
-      var bodyPar = JSON.parse(body);
+    var bodyPar = JSON.parse(body);
 
-      for (var i in bodyPar.items)  {
-        if (type === 'tenant') { console.log('Tenants: ' +bodyPar.items[i].displayName) };
-        if (type === 'template') { console.log('Templates: ' +bodyPar.items[i].name) };
-        if (type === 'service') { console.log('Services: ' +bodyPar.items[i].name) };
-      };
-    }
-    else if (error) throw new Error(error);
+    //Process the command options appropriately for each type of object
+    for (var i in bodyPar.items)  {
+      if (type === 'tenant') { console.log('Tenants: ' +bodyPar.items[i].displayName) };
+      if (type === 'template') { console.log('Templates: ' +bodyPar.items[i].name) };
+      if (type === 'service') { console.log('Services: ' +bodyPar.items[i].name) };
+    };
   });
 };
 
 function exec_deploy (tenant, input)  {
-  if (config.debug) { console.log('In exec_deploy with Args: ' +tenant+ ' ' +input)};
+  if (config.debug) { console.log('DEBUG: In exec_deploy with Args: ' +tenant+ ' ' +input)};
 
   var data = fs.readFileSync(input);
 
@@ -167,28 +177,31 @@ function exec_deploy (tenant, input)  {
   };
 
   if (config.debug) {
+    console.log('DEBUG: \n');
     console.log('options.method: ' +options.method);
     console.log('options.url: ' +options.url);
-    console.log('options.headers: ' +JSON.stringify(options.headers));  //this is an array.
-    console.log('options.body: ' +JSON.stringify(options.body));  //this is an array.
+    console.log('options.headers: ' +JSON.stringify(options.headers, ' ', '\t'));  //this is an array.
+    console.log('options.body: ' +JSON.stringify(options.body, ' ', '\t'));  //this is an array.
     console.log('options.json: ' +options.json);
   };
 
   request(options, function (error, response, body) {
-    if (config.debug) { console.log('response.statusCode: ' +response.statusCode) };
-    if (response.statusCode == '401') {
-      console.log('401 - Unauthorized: Auth Token may have expired. Re-initialize with \'iWorkflow.js init\'');
+    if (error)  {
+      handle_error('deploy','node_err',error);
+      process.exit();
     }
-    else if (response.statusCode == '200')  {
-      if (config.debug) { console.log('response.body' +JSON.stringify(response.body))};
-    }
-    else if (error) throw new Error(error);
+    else if (response.statusCode !== 200) {
+      handle_error('deploy','http_error',response);
+      process.exit();
+    };
+    if (config.debug) { console.log('\nDEBUG: response.body' +JSON.stringify(response.body,' ','\t'))}
+    console.log('Response: \n\n' +JSON.stringify('HTTP Response: ' +response.statusCode+ ' ' +response.message));
   });
 };
 
 function exec_modify (tenant,service,input) {
   //implement L4-L7 service PATCH. Use add-pool example
-  if (config.debug) { console.log('In exec_deploy with Args: ' +tenant+ ' ' +service+ ' ' +input)};
+  if (config.debug) { console.log('\nDEBUG: In exec_deploy with Args: ' +tenant+ ' ' +service+ ' ' +input)};
 
   var data = fs.readFileSync(input);
 
@@ -204,6 +217,7 @@ function exec_modify (tenant,service,input) {
   };
 
   if (config.debug) {
+    console.log('\nDEBUG: \n');
     console.log('options.method: ' +options.method);
     console.log('options.url: ' +options.url);
     console.log('options.headers: ' +JSON.stringify(options.headers));  //this is an array.
@@ -212,24 +226,22 @@ function exec_modify (tenant,service,input) {
   };
 
   request(options, function (error, response, body) {
-    if (config.debug) { console.log('response.statusCode: ' +response.statusCode) };
-    if (config.debug) { console.log('response.body: ' +JSON.stringify(response.body)) };
-    if (response.statusCode == '401') {
-      console.log('401 - Unauthorized: Auth Token may have expired. Re-initialize with \'iWorkflow.js init\'');
-      if (config.debug) { console.log('response.body' +JSON.stringify(response.body))};
+    if (error)  {
+      handle_error('modify','node_err',error);
+      process.exit();
+    }
+    else if (response.statusCode !== 200) {
+      handle_error('modify','http_error',response);
+      process.exit();
+    };
 
-    }
-    else if (response.statusCode == '200')  {
-      if (config.debug) { console.log('response.body' +JSON.stringify(response.body))};
-    }
-    else if (error) throw new Error(error);
+    if (config.debug) { console.log('\nDEBUG: response.body' +JSON.stringify(response.body))};
   });
 };
 
-
 function exec_delete (tenant, service) {
 
-  if (config.debug) { console.log('In exec_deploy with Args: ' +tenant)};
+  if (config.debug) { console.log('\nDEBUG: In exec_deploy with Args: ' +tenant)};
 
   var options = {
     method: 'DELETE',
@@ -242,6 +254,7 @@ function exec_delete (tenant, service) {
   };
 
   if (config.debug) {
+    console.log('\nDEBUG: \n');
     console.log('options.method: ' +options.method);
     console.log('options.url: ' +options.url);
     console.log('options.headers: ' +JSON.stringify(options.headers));  //this is an array.
@@ -249,20 +262,34 @@ function exec_delete (tenant, service) {
   };
 
   request(options, function (error, response, body) {
-    if (config.debug) { console.log('response.statusCode: ' +response.statusCode) };
+    if (config.debug) { console.log('\nDEBUG: response.statusCode: ' +response.statusCode) };
     if (response.statusCode == '401') {
       console.log('401 - Unauthorized: Auth Token may have expired. Re-initialize with \'iWorkflow.js init\'');
     }
     else if (response.statusCode == '200')  {
-      if (config.debug) { console.log('Deletion successful. response.message' +JSON.stringify(response.message))};
+      if (config.debug) { console.log('\nDEBUG: Deletion successful. response.message' +JSON.stringify(response.message))};
     }
     else if (response.statusCode == '404')  {
-      if (config.debug) { console.log('Deletion unsuccessful. 404 Not found. Check the service: \'' +service+ '\' exists using \'iWorkflow.js list service ' +service+ '\'')};
+      if (config.debug) { console.log('\nDEBUG: Deletion unsuccessful. 404 Not found. Check the service: \'' +service+ '\' exists using \'iWorkflow.js list service ' +service+ '\'')};
     }
     else if (error) throw new Error(error);
   });
 };
 
-function handle_error (err_from,err_data)  {
-  if (config.debug) { console.log('error caught in: ' +err_from+ 'with error: ' +err_data) };
+function handle_error (err_from,err_type,err_data)  {
+//TODO: recieve error and iterate through the errors arrays looking for data. May need to stringify some of them
+  if (config.debug) { console.log('\nDEBUG: In function handle_error()')  };
+
+  console.log('ERROR condition from command: \'' +err_from+ '\'');
+  //Get VERBOSE in debug mode.
+
+  if (err_type === 'node_error')  {
+    console.log('node error: ' +err_data);
+  }
+  else if (err_type === 'http_error')  {
+    console.log('HTTP error: ' +err_data.statusCode);
+    console.log('Error message: ' +err_data.body.message);
+  };
+
+  if (config.debug) {console.log('\nDEBUG: \'' +err_from+ '\' generated error: ' +JSON.stringify(err_data, ' ', '\t'))};
 };

@@ -4,9 +4,10 @@ Node package to simplify communication with the F5 iWorkflow REST API.
 iWorkflow.js is an iWorkflow REST helper. Use it as a shortcut to perform common actions against the iWorkflow REST API.
 
 Requires: request - https://www.npmjs.com/package/request
+
 `npm install request`
 
-Or just use it for examples when writing your own code. I'm not precious about sharing code. :)
+Or just use it for examples when writing your own code. I'm not precious about code sharing. :)
 
 Enjoy!
 
