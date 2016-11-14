@@ -1,12 +1,12 @@
 {
-    "name":"myTestDeployment0",
+    "name":"myTestDeployment",
     "tenantTemplateReference":{
-        "link":"https://localhost/mgmt/cm/cloud/tenant/templates/iapp/AppSvcs_Integration_verA"
+        "link":"https://localhost/mgmt/cm/cloud/tenant/templates/iapp/myTemplate"
     },
     "properties":[
         {
             "id":"cloudConnectorReference",
-            "value":"https://localhost/mgmt/cm/cloud/connectors/local/bea388b8-46f8-4363-9f89-d8920ea8931f"
+            "value":"https://localhost/mgmt/cm/cloud/connectors/local/5673d72d-eb51-40c9-9778-16b9fdd7fc16"
         }
     ],
     "tables":[

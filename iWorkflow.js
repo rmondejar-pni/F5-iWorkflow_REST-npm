@@ -1,6 +1,4 @@
-//TODO: review error handling
-//TODO: create 'handle_error' function. Use switch to handle HTTP statusCode's. Implement across all commands.
-
+//TODO: Add 'iWorkflow.js list cloud'. This is required for the cloud connector in 'deploy' & 'modify' commands. 
 
 //iWorkflow.js
 const fs = require('fs');
@@ -21,7 +19,7 @@ if (config.debug) {
 
 switch (myArgs[0]) {
   case 'init':
-    if (myArgs[1] === 'help' || myArgs.length < 3)  {
+    if (myArgs[1] === 'help' || myArgs.length < 4)  {
       console.log('Usage: ./iWorkflow.js init [host] [username] [password]\n');
       console.log('\tThe \'init\' command retrieves an iWorkflow Auth token, and Tenant list, and creates the config.js file used by other iWorkflow.js commands');
     }
@@ -84,7 +82,7 @@ switch (myArgs[0]) {
 function exec_init (host, username, password) {
   if (config.debug) { console.log('DEBUG: In exec_init with Args: ' +host+ ' ' +username+ ' ' +password)};
 
-  //build options.
+  //Build request options.
   var options = {
     method: 'POST',
     url: 'https://'+host+'/mgmt/shared/authn/login',
@@ -104,12 +102,13 @@ function exec_init (host, username, password) {
       process.exit();
     }
     else if (response.statusCode !== 200) {
-      handle_error('init','http_error',response);
+      handle_error('init','http_err',response);
       process.exit();
     };
 
     var token = body.token.token;
-    if (config.debug) { console.log('DEBUG: You got a shiny new token:' +token)};
+    console.log('Auth token:' +token);
+
     //build the config
     var conf_data = 'module.exports = {\n\thost: \''+host+'\',\n\ttoken: \''+token+'\',\n\tstrict: '+config.strict+',\n\tdebug: '+config.debug+'\n};';
     if (config.debug) { console.log('DEBUG: Config data: ' +conf_data)  };
@@ -117,13 +116,27 @@ function exec_init (host, username, password) {
     //write the config to config.js
     fs.writeFile('config.js', conf_data, (err) => {
       if (err) throw err;
-      console.log('Config data written to ./config.js!');
+      console.log('Config data written to ./config.js\n');
     });
   });
 };
 
 function exec_list (type,tenant) {
   if (config.debug) { console.log('DEBUG: In exec_list with Args: ' +type)};
+
+  if (type === 'tenant') {
+    console.log('Tenants:')
+  }
+  else if (type === 'template') {
+    console.log('Templates:')
+  }
+  else if (type === 'service') {
+    console.log('\'' +tenant+ '\' services: ')
+  }
+  else {
+    console.log('Invalid option.\n');
+    process.exit();
+  };
 
   //build options.
   var options = { method: 'GET',
@@ -140,12 +153,13 @@ function exec_list (type,tenant) {
   if (type === 'service') { options.url = 'https://'+config.host+'/mgmt/cm/cloud/tenants/'+tenant+'/services/iapp/' };
 
   request(options, function (error, response, body) {
+
     if (error)  {
       handle_error('list','node_err',error);
       process.exit();
     }
     else if (response.statusCode !== 200) {
-      handle_error('list','http_error',response);
+      handle_error('list','http_err',response);
       process.exit();
     };
 
@@ -153,10 +167,21 @@ function exec_list (type,tenant) {
 
     //Process the command options appropriately for each type of object
     for (var i in bodyPar.items)  {
-      if (type === 'tenant') { console.log('Tenants: ' +bodyPar.items[i].displayName) };
-      if (type === 'template') { console.log('Templates: ' +bodyPar.items[i].name) };
-      if (type === 'service') { console.log('Services: ' +bodyPar.items[i].name) };
+      if (type === 'tenant') {
+        console.log('\t' +bodyPar.items[i].displayName);
+        if (config.debug) { console.log('\nDEBUG: ' +JSON.stringify(bodyPar.items[i])+ '\n')};
+      };
+      if (type === 'template') {
+        console.log('\t' +bodyPar.items[i].name)
+        if (config.debug) { console.log('\nDEBUG: ' +JSON.stringify(bodyPar.items[i])+ '\n')};
+      };
+      if (type === 'service') {
+        console.log('\t' +bodyPar.items[i].name)
+        if (config.debug) { console.log('\nDEBUG: ' +JSON.stringify(bodyPar.items[i])+ '\n')};
+      };
     };
+    console.log('\n');
+
   });
 };
 
@@ -194,8 +219,10 @@ function exec_deploy (tenant, input)  {
       handle_error('deploy','http_error',response);
       process.exit();
     };
-    if (config.debug) { console.log('\nDEBUG: response.body' +JSON.stringify(response.body,' ','\t'))}
+
     console.log('Response: \n\n' +JSON.stringify('HTTP Response: ' +response.statusCode+ ' ' +response.message));
+    if (config.debug) { console.log('\nDEBUG: response.body' +JSON.stringify(response.body,' ','\t'))}  // Dump ALL the response data
+
   });
 };
 
@@ -235,7 +262,9 @@ function exec_modify (tenant,service,input) {
       process.exit();
     };
 
-    if (config.debug) { console.log('\nDEBUG: response.body' +JSON.stringify(response.body))};
+    console.log('Response: \n\n' +JSON.stringify('HTTP Response: ' +response.statusCode+ ' ' +response.message));
+    if (config.debug) { console.log('\nDEBUG: response.body' +JSON.stringify(response.body,' ','\t'))}  // Dump ALL the response data
+
   });
 };
 
@@ -263,33 +292,62 @@ function exec_delete (tenant, service) {
 
   request(options, function (error, response, body) {
     if (config.debug) { console.log('\nDEBUG: response.statusCode: ' +response.statusCode) };
-    if (response.statusCode == '401') {
-      console.log('401 - Unauthorized: Auth Token may have expired. Re-initialize with \'iWorkflow.js init\'');
+
+    if (error)  {
+      handle_error('list','node_err',error);
+      process.exit();
     }
-    else if (response.statusCode == '200')  {
-      if (config.debug) { console.log('\nDEBUG: Deletion successful. response.message' +JSON.stringify(response.message))};
-    }
-    else if (response.statusCode == '404')  {
-      if (config.debug) { console.log('\nDEBUG: Deletion unsuccessful. 404 Not found. Check the service: \'' +service+ '\' exists using \'iWorkflow.js list service ' +service+ '\'')};
-    }
-    else if (error) throw new Error(error);
+    else if (response.statusCode !== 200) {
+      handle_error('list','http_error',response);
+      process.exit();
+    };
+
+    console.log('Response: \n\n' +JSON.stringify('HTTP Response: ' +response.statusCode+ ' ' +response.message));
+    if (config.debug) { console.log('\nDEBUG: response.body' +JSON.stringify(response.body,' ','\t'))}  // Dump ALL the response data
+
   });
 };
 
 function handle_error (err_from,err_type,err_data)  {
-//TODO: recieve error and iterate through the errors arrays looking for data. May need to stringify some of them
+
   if (config.debug) { console.log('\nDEBUG: In function handle_error()')  };
 
   console.log('ERROR condition from command: \'' +err_from+ '\'');
-  //Get VERBOSE in debug mode.
 
-  if (err_type === 'node_error')  {
-    console.log('node error: ' +err_data);
+  if (err_type === 'node_err')  {
+    console.log('node error: ' +err_data+ '\n');
   }
-  else if (err_type === 'http_error')  {
-    console.log('HTTP error: ' +err_data.statusCode);
-    console.log('Error message: ' +err_data.body.message);
-  };
+  else if (err_type === 'http_err')  {
 
-  if (config.debug) {console.log('\nDEBUG: \'' +err_from+ '\' generated error: ' +JSON.stringify(err_data, ' ', '\t'))};
+    var errcode = err_data.statusCode;
+    var errmsg = err_data.body.message;
+    if (config.debug) { console.log('errmsg: ' +errmsg) };
+
+    switch (errcode) {
+      case 401:
+        if (errmsg.startsWith('Authentication failed')) {
+          console.log(errcode+ ' ' +errmsg+ ' Check credentials.\n');
+        }
+        else if (errmsg.startsWith('Authorization failed')) {
+          console.log('HTTP 401 error. Authorization Failed. Do you have the correct permissions/tenant assignment to perform this action.\n');
+        };
+        break;
+
+      case 500:
+        console.log('HTTP 500 error. Refer to iWorkflow log: /var/log/restjavad.0.log\n');
+        break;
+
+      case 404:
+        if (err_from === ('delete' || 'deploy')) {
+          console.log('\nDEBUG: 404 Not found - ' +err_from+ ' unsuccessful.\n');
+        };
+        break;
+
+      default:
+        if (config.debug) {console.log('\nDEBUG: \'' +err_from+ '\' generated error: ' +JSON.stringify(err_data, ' ', '\t'))};
+        console.log('HTTP error: ' +errcode);
+        console.log('Error message: ' +errmsg+ '\n');
+    };
+
+  };
 };
